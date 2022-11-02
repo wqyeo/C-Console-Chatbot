@@ -31,6 +31,13 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="chat1002.h" />
+		<Unit filename="chatbot.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="knowledge.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

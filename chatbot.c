@@ -152,11 +152,7 @@ int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_load(const char *intent) {
-
-	/* to be implemented */
-
-	return 0;
-
+	return compare_token(intent, "load") == 0;
 }
 
 
@@ -189,11 +185,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_question(const char *intent) {
-
-	/* to be implemented */
-
-	return 0;
-
+	return compare_token(intent, "what") == 0 || compare_token(intent, "where") == 0 || compare_token(intent, "who");
 }
 
 
@@ -212,8 +204,25 @@ int chatbot_is_question(const char *intent) {
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 
-	/* to be implemented */
+    // No params given after command.
+    if (inc < 2) {
+        // TODO: Print warning message or something.
+        return 0;
+    }
 
+    // Check "is" or "are".
+    int linking_verb_flag = 0;
+    if (compare_token(inv[1], "is") == 0 || compare_token(inv[1], "are") == 0){
+        linking_verb_flag = 1;
+    }
+
+    // No entity given.
+    if (linking_verb_flag == 1 && inc < 3) {
+        // TODO: Print warning message or something.
+        return 0;
+    }
+
+    // TODO: Check entity and answer.
 	return 0;
 
 }
@@ -230,11 +239,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_reset(const char *intent) {
-
-	/* to be implemented */
-
-	return 0;
-
+	return compare_token(intent, "reset");
 }
 
 
