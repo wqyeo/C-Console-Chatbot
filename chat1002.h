@@ -28,6 +28,9 @@
 #define KB_INVALID  -2
 #define KB_NOMEM    -3
 
+// The maximum number of entity-value pairing we can store in cache.
+#define MAX_ENTITY_CACHE 512
+
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
 void prompt_user(char *buf, int n, const char *format, ...);
