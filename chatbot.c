@@ -168,11 +168,26 @@ int chatbot_is_load(const char *intent) {
  *   0 (the chatbot always continues chatting after loading knowledge)
  */
 int chatbot_do_load(int inc, char *inv[], char *response, int n) {
+    if (inc < 2) {
+        // No params given after command.
+        strncpy(response, "Indicate the file name to load from. Ex: 'LOAD from INF1002'", n);
+        return 0;
+    }
 
-	/* to be implemented */
+    // Check if the 2nd word is "from".
+    int linking_verb_flag = 0;
+    if (compare_token(inv[1], "from") == 0){
+        linking_verb_flag = 1;
+    }
 
+    if (linking_verb_flag == 1 && inc < 3) {
+        // No file given to load from.
+        strncpy(response, "Indicate the file name to load from. Ex: 'LOAD from INF1002'", n);
+        return 0;
+    }
+
+    char* file_name = inv[linking_verb_flag + 1];
 	return 0;
-
 }
 
 
