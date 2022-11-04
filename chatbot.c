@@ -42,6 +42,8 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#include "entityvalue.h"
 #include "chat1002.h"
 
 

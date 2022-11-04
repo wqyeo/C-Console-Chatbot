@@ -12,18 +12,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chat1002.h"
 #include "entityvalue.h"
+#include "chat1002.h"
 
 /* word delimiters */
 const char *delimiters = " ?\t\n";
 
-// Acts as a dictionary; Cache for loaded entity names paired to value.
-entityValue entityDictionary[MAX_ENTITY_CACHE];
+// Acts like a dictionary; Cache for loaded entity names paired to value.
+struct entityValue entityCache[MAX_ENTITY_CACHE];
 
-/*
- * Main loop.
- */
 int main(int argc, char *argv[]) {
 
 	char input[MAX_INPUT];      /* buffer for holding the user input */
