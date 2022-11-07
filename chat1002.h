@@ -31,6 +31,7 @@
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
 void prompt_user(char *buf, int n, const char *format, ...);
+char* concatenate(const char* str1, const char* str2);
 
 /* functions defined in chatbot.c */
 const char *chatbot_botname();
@@ -49,9 +50,9 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n);
 
 /* functions defined in knowledge.c */
 int knowledge_get(const char *intent, const char *entity, char *response, int n);
-int knowledge_put(const char *intent, const char *entity, const char *response);
+int knowledge_put(const char *intent, const char *entity, char *response);
 void knowledge_reset();
-int knowledge_read(FILE *f);
+int knowledge_read(FILE *f, const char *response);
 void knowledge_write(FILE *f);
 
 #endif

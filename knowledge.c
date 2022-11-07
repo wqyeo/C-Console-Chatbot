@@ -69,10 +69,11 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
  *
  * Input:
  *   f - the file
+ *   response - Any additional response from this operation
  *
  * Returns: the number of entity/response pairs successful read from the file
  */
-int knowledge_read(FILE *f) {
+int knowledge_read(FILE *f, char *response) {
 
 	/* to be implemented */
 

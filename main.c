@@ -127,3 +127,11 @@ void prompt_user(char *buf, int n, const char *format, ...) {
 	if (nl != NULL)
 		*nl = '\0';
 }
+
+// Add 2 strings together.
+char* concatenate(const char *str1, const char *str2) {
+    char *output = malloc(strlen(str1) + strlen(str2) + 1);
+    strcpy(output, str1);
+    strcat(output, str2);
+    return output;
+}
