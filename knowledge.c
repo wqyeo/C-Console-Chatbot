@@ -16,8 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "chat1002.h"
-
+#include "util.h"
 /*
  * Get the response to a question.
  *
@@ -76,6 +75,37 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 int knowledge_read(FILE *f, char *response) {
 
 	/* to be implemented */
+
+    enum intentType curr_intent_type = WHAT;
+
+    char current_line[MAX_INPUT];
+	fgets(current_line, MAX_INPUT, (FILE*)f);
+
+
+
+	while (current_line != NULL){
+        if (is_whitespace_or_empty(current_line, MAX_INPUT)){
+            continue;
+        }
+
+        int intent = try_determine_intent(current_line);
+        if (intent != NULL){
+            // Change intent type.
+            curr_intent_type = intent;
+            break;
+        }
+
+        struct entityValue curr_entityValue;
+        if (!try_get_entityValue(current_line, MAX_INPUT, curr_intent_type, &curr_entityValue)){
+            // Failed to get entityvalue
+            // TODO: error message or smth.
+            break;
+        }
+
+        fgets(current_line, MAX_INPUT, (FILE*)f);
+	}
+
+
 
 	return 0;
 }

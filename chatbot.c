@@ -40,6 +40,7 @@
  * returned by these functions at the start of each line.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -65,9 +66,7 @@ const char *chatbot_botname() {
  * Returns: the name of the user as a null-terminated string
  */
 const char *chatbot_username() {
-
 	return "User";
-
 }
 
 
@@ -104,7 +103,6 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 		snprintf(response, n, "I don't understand \"%s\".", inv[0]);
 		return 0;
 	}
-
 }
 
 
@@ -189,9 +187,9 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     // TODO: Check if the user gave a '.ini' at the end.
     // Append if not, else do nothing.
     char* file_name = concatenate(inv[linking_verb_flag + 1], ".ini");
-    strncpy(response, "Loading configuration from " + file_name + ".\n", n);
+    strncpy(response, concatenate("Loading configuration from ", file_name, ".\n"), n);
 
-    File* ini_file;
+    FILE* ini_file;
     ini_file = fopen(file_name, "r");
 
     if (ini_file == NULL) {
@@ -201,7 +199,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     }
 
     // Read and load
-    int readed_count = knowledge_read(ini_file);
+    int readed_count = knowledge_read(ini_file, response);
     if (readed_count > 0){
         char buffer[MAX_RESPONSE];
         sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);

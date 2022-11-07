@@ -9,6 +9,7 @@
 #define _CHAT1002_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 /* the maximum number of characters we expect in a line of input (including the terminating null)  */
 #define MAX_INPUT    256
@@ -31,7 +32,8 @@
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
 void prompt_user(char *buf, int n, const char *format, ...);
-char* concatenate(const char* str1, const char* str2);
+char* concatenate(const char *str1, const char *str2, ...);
+bool is_whitespace_or_empty(const char *input, int size);
 
 /* functions defined in chatbot.c */
 const char *chatbot_botname();
@@ -50,9 +52,9 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n);
 
 /* functions defined in knowledge.c */
 int knowledge_get(const char *intent, const char *entity, char *response, int n);
-int knowledge_put(const char *intent, const char *entity, char *response);
+int knowledge_put(const char *intent, const char *entity, const char *response);
 void knowledge_reset();
-int knowledge_read(FILE *f, const char *response);
+int knowledge_read(FILE *f, char *response);
 void knowledge_write(FILE *f);
 
 #endif
