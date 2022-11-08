@@ -131,25 +131,40 @@ void prompt_user(char *buf, int n, const char *format, ...) {
 }
 
 // Add multiple strings together.
-char* concatenate(const char *str1, const char *str2, ...) {
-    char *output = malloc(strlen(str1) + strlen(str2) + 1);
-    strcpy(output, str1);
-    strcat(output, str2);
+// NOTE: First arg should be the number of strings to add.
+char* concatenate(int args_count, ...) {
+    // https://www.joelonsoftware.com/2001/12/11/back-to-basics/
 
-    // For num of arguements
     va_list args;
-    int args_num;
-	va_start(args, args_num);
+	va_start(args, args_count);
 
+
+	char* inputs[args_count];
+
+	// Find output length
+    int length = 0;
     int i;
-	for (i = 0; i< args_num; ++i){
-        // Append
-        strcat(output, va_arg(args, char*));
-	}
-	va_end(args);
+    for (i = 0; i < args_count; ++i) {
+        inputs[i] = va_arg(args, char*);
+        length += strlen(inputs[i]);
+    }
+    // Set output length
+    char *output = (char*)malloc(length + 1);
 
+
+    char *p_output = output;
+    for (i = 0; i < args_count; ++i) {
+        // Add all by mem
+        char *add_str = inputs[i];
+        while (*add_str)
+            *p_output++ = *add_str++;
+    }
+    *p_output = '\0';
+    // Free
+    va_end(args);
     return output;
 }
+
 
 bool is_whitespace_or_empty(const char *input, int size){
     int empty_char_size = 4;
