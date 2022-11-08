@@ -32,7 +32,7 @@
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
 void prompt_user(char *buf, int n, const char *format, ...);
-char* concatenate(const char *str1, const char *str2, ...);
+char* concatenate(int args_count, ...);
 bool is_whitespace_or_empty(const char *input, int size);
 
 /* functions defined in chatbot.c */

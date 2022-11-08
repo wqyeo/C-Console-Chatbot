@@ -186,15 +186,15 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
 
     // TODO: Check if the user gave a '.ini' at the end.
     // Append if not, else do nothing.
-    char* file_name = concatenate(inv[linking_verb_flag + 1], ".ini");
-    strncpy(response, concatenate("Loading configuration from ", file_name, ".\n"), n);
+    char* file_name = concatenate(2, inv[linking_verb_flag + 1], ".ini");
+    strncpy(response, concatenate(3, "Loading configuration from '", file_name, "'.\n"), n);
 
     FILE* ini_file;
     ini_file = fopen(file_name, "r");
 
     if (ini_file == NULL) {
         // Failed to open file; Probably doesn't exists.
-        strncpy(response, concatenate(response, "Failed to load file. Does the configuration exists?\n(Do not add '.ini')"), n);
+        strncpy(response, concatenate(2, response, "\nFailed to load file. Does the configuration exists?\n(HINT: Do not add '.ini')"), n);
         return 0;
     }
 
@@ -204,7 +204,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
         char buffer[MAX_RESPONSE];
         sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
     } else {
-        strncpy(response, concatenate(response, "The given file is invalid. No knowledge was loaded."), n);
+        strncpy(response, concatenate(2, response, "The given file is invalid. No knowledge was loaded."), n);
     }
 
     fclose(ini_file);
