@@ -63,6 +63,8 @@ int main(int argc, char *argv[]) {
 		/* invoke the chatbot */
 		done = chatbot_main(inc, inv, output, MAX_RESPONSE);
 		printf("%s: %s\n", chatbot_botname(), output);
+		// Clear response buffer
+		strncpy(output, "\0", MAX_RESPONSE);
 
 	} while (!done);
 
@@ -126,4 +128,48 @@ void prompt_user(char *buf, int n, const char *format, ...) {
 	char *nl = strchr(buf, '\n');
 	if (nl != NULL)
 		*nl = '\0';
+}
+
+// Add multiple strings together.
+char* concatenate(const char *str1, const char *str2, ...) {
+    char *output = malloc(strlen(str1) + strlen(str2) + 1);
+    strcpy(output, str1);
+    strcat(output, str2);
+
+    // For num of arguements
+    va_list args;
+    int args_num;
+	va_start(args, args_num);
+
+    int i;
+	for (i = 0; i< args_num; ++i){
+        // Append
+        strcat(output, va_arg(args, char*));
+	}
+	va_end(args);
+
+    return output;
+}
+
+bool is_whitespace_or_empty(const char *input, int size){
+    int empty_char_size = 4;
+    char empty_chars[] = {
+        ' ',
+        '\0',
+        '\n',
+        '\r'
+    };
+
+    bool flag = true;
+    int i;
+    for (i = 0; i < size; ++i){
+        int j;
+        for (j = 0; j < empty_char_size; ++j){
+            if (empty_chars[j] != input[i]){
+                // Input has a char that is not empty/whitespace.
+                return false;
+            }
+        }
+    }
+    return flag;
 }

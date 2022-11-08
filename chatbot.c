@@ -40,6 +40,7 @@
  * returned by these functions at the start of each line.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -65,9 +66,7 @@ const char *chatbot_botname() {
  * Returns: the name of the user as a null-terminated string
  */
 const char *chatbot_username() {
-
 	return "User";
-
 }
 
 
@@ -84,7 +83,7 @@ const char *chatbot_username() {
 int chatbot_main(int inc, char *inv[], char *response, int n) {
 
 	/* check for empty input */
-	if (inc < 1) {
+	if (inc <= 0) {
 		snprintf(response, n, "");
 		return 0;
 	}
@@ -104,7 +103,6 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 		snprintf(response, n, "I don't understand \"%s\".", inv[0]);
 		return 0;
 	}
-
 }
 
 
@@ -168,11 +166,49 @@ int chatbot_is_load(const char *intent) {
  *   0 (the chatbot always continues chatting after loading knowledge)
  */
 int chatbot_do_load(int inc, char *inv[], char *response, int n) {
+    if (inc < 2) {
+        // No params given after command.
+        strncpy(response, "Indicate the file name to load from. Ex: 'LOAD from INF1002'", n);
+        return 0;
+    }
 
-	/* to be implemented */
+    // Check if the 2nd word is "from".
+    int linking_verb_flag = 0;
+    if (compare_token(inv[1], "from") == 0){
+        linking_verb_flag = 1;
+    }
 
+    if (linking_verb_flag == 1 && inc < 3) {
+        // No file given to load from.
+        strncpy(response, "Indicate the file name to load from. Ex: 'LOAD from INF1002'", n);
+        return 0;
+    }
+
+    // TODO: Check if the user gave a '.ini' at the end.
+    // Append if not, else do nothing.
+    char* file_name = concatenate(inv[linking_verb_flag + 1], ".ini");
+    strncpy(response, concatenate("Loading configuration from ", file_name, ".\n"), n);
+
+    FILE* ini_file;
+    ini_file = fopen(file_name, "r");
+
+    if (ini_file == NULL) {
+        // Failed to open file; Probably doesn't exists.
+        strncpy(response, concatenate(response, "Failed to load file. Does the configuration exists?\n(Do not add '.ini')"), n);
+        return 0;
+    }
+
+    // Read and load
+    int readed_count = knowledge_read(ini_file);
+    if (readed_count > 0){
+        char buffer[MAX_RESPONSE];
+        sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
+    } else {
+        strncpy(response, concatenate(response, "The given file is invalid. No knowledge was loaded."), n);
+    }
+
+    fclose(ini_file);
 	return 0;
-
 }
 
 
@@ -226,7 +262,6 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 
     // TODO: Check entity and answer.
 	return 0;
-
 }
 
 

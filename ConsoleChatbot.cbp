@@ -37,9 +37,6 @@
 		<Unit filename="chatbot.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="entityvalue.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="entityvalue.h" />
 		<Unit filename="knowledge.c">
 			<Option compilerVar="CC" />
@@ -47,6 +44,10 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="util.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="util.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

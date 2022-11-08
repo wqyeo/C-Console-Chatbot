@@ -6,7 +6,8 @@
 // The maximum number of entity-value pairing we can store in cache.
 #define MAX_ENTITY_CACHE 512
 
-enum intentType { WHO = 0, WHERE = 1, WHICH = 2 };
+// U
+enum intentType { EMPTY = 0, WHO = 0, WHERE = 1, WHAT = 2 };
 
 struct entityValue {
     // Key
@@ -18,6 +19,7 @@ struct entityValue {
 };
 
 // Cache for loaded entity names paired to value.
-struct entityValue entityCache[MAX_ENTITY_CACHE];
+// Check util.h for functions to assists in using this cache.
+struct entityValue entity_cache[MAX_ENTITY_CACHE];
 
 #endif // ENTITYVALUE_H_INCLUDED
