@@ -68,23 +68,23 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
  *
  * Input:
  *   f - the file
- *   response - Any additional response from this operation
  *
  * Returns: the number of entity/response pairs successful read from the file
  */
-int knowledge_read(FILE *f, char *response) {
-
-	/* to be implemented */
+int knowledge_read(FILE *f) {
+    int readed_pairs = 0;
 
     enum intentType curr_intent_type = WHAT;
-
     char current_line[MAX_INPUT];
 	fgets(current_line, MAX_INPUT, (FILE*)f);
 
 
-
+	// Continuously read until end of file
+	// (or until error)
 	while (current_line != NULL){
         if (is_whitespace_or_empty(current_line, MAX_INPUT)){
+            // Whitespaces, skip this.
+            fgets(current_line, MAX_INPUT, (FILE*)f);
             continue;
         }
 
@@ -92,22 +92,25 @@ int knowledge_read(FILE *f, char *response) {
         if (intent != NULL){
             // Change intent type.
             curr_intent_type = intent;
-            break;
         }
 
         struct entityValue curr_entityValue;
         if (!try_get_entityValue(current_line, MAX_INPUT, curr_intent_type, &curr_entityValue)){
             // Failed to get entityvalue
             // TODO: error message or smth.
-            break;
+            --readed_pairs;
+        } else if (!try_insertReplace_cache(curr_entityValue)){
+            // Failed to insert into cache
+            // TODO: error message
+            --readed_pairs;
         }
 
+        ++readed_pairs;
+        // Read next line.
         fgets(current_line, MAX_INPUT, (FILE*)f);
 	}
 
-
-
-	return 0;
+	return readed_pairs;
 }
 
 

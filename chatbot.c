@@ -199,7 +199,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     }
 
     // Read and load
-    int readed_count = knowledge_read(ini_file, response);
+    int readed_count = knowledge_read(ini_file);
     if (readed_count > 0){
         char buffer[MAX_RESPONSE];
         sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
@@ -208,7 +208,6 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     }
 
     fclose(ini_file);
-
 	return 0;
 }
 

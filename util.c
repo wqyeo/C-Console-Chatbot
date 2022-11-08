@@ -1,21 +1,23 @@
 #include "util.h"
 #include "entityvalue.h"
 
+#pragma region Knowledge Utils
 // Determine intent from string
 // NULL if invalid.
 int try_determine_intent(char* input){
-    if (input == "[what]"){
+    if (strcmp(input, "[what]") == 0){
         return WHAT;
-    } else if (input == "[where]") {
+    } else if (strcmp(input, "[where]") == 0) {
         return WHERE;
-    } else if (input == "[who]"){
+    } else if (strcmp(input, "[who]") == 0){
         return WHO;
     }
 
     return NULL;
 }
+
 bool try_get_entityValue(char* input, int input_size, enum intentType intent_type, struct entityValue* result){
-    result -> intent = intent_type;
+    result->intent = intent_type;
 
     bool found_equal_sign = false;
 
@@ -88,3 +90,61 @@ char* try_get_description(char* input, int size){
     }
     return result;
 }
+#pragma endregion
+
+#pragma region Entity Cache Utils
+
+bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, struct entityValue* result) {
+    int i;
+    for (i = 0; i < MAX_ENTITY_CACHE; ++i){
+        if (entity_cache[i].intent == NULL || entity_cache[i].intent == EMPTY){
+            // Hit the end; Probably doesn't exists.
+            return false;
+        }
+
+        if (strcmp(entity_cache[i].entity, entity_name) == 0 && intent_type == entity_cache[i].intent){
+            // Found that fits condition.
+            result = &(entity_cache[i]);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Insert at end. Replace description if conflicting entity+intent is found.
+bool try_insertReplace_cache(struct entityValue element){
+    int i;
+    for (i = 0; i < MAX_ENTITY_CACHE; ++i){
+        if (entity_cache[i].intent == NULL || entity_cache[i].intent == EMPTY){
+            // Add at the end.
+            entity_cache[i] = element;
+            ++i;
+            if (i < MAX_ENTITY_CACHE){
+                // Expand the end, if there is still space.
+                entity_cache[i].intent = EMPTY;
+            }
+            return true;
+        }
+
+        if (strcmp(entity_cache[i].entity, element.entity) == 0 && element.intent == entity_cache[i].intent) {
+            // Found a conflicting entity/element, replace instead.
+            entity_cache[i] = element;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Size of entity cache
+int get_current_cache_size(){
+    int i;
+    for (i = 0; i < MAX_ENTITY_CACHE; ++i){
+        if (entity_cache[i].intent == NULL || entity_cache[i].intent == EMPTY){
+            break;
+        }
+    }
+    return i;
+}
+#pragma endregion
