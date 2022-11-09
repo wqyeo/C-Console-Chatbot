@@ -6,6 +6,19 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
+			<Target title="Debug_Log">
+				<Option output="bin/Debug_Log/ConsoleChatbot" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug_Log/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DLOG_UTIL=1" />
+					<Add option="-DLOG_KNOWLEDGE=1" />
+					<Add option="-DTEST_CASE=1" />
+					<Add directory="include" />
+				</Compiler>
+			</Target>
 			<Target title="Debug">
 				<Option output="bin/Debug/ConsoleChatbot" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />

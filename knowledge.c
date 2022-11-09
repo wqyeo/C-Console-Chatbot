@@ -76,39 +76,67 @@ int knowledge_read(FILE *f) {
 
     enum intentType curr_intent_type = WHAT;
     char current_line[MAX_INPUT];
-	fgets(current_line, MAX_INPUT, (FILE*)f);
-
 
 	// Continuously read until end of file
 	// (or until error)
-	while (current_line != NULL){
+	while (fgets(current_line, MAX_INPUT, f) != NULL){
         if (is_whitespace_or_empty(current_line, MAX_INPUT)){
             // Whitespaces, skip this.
-            fgets(current_line, MAX_INPUT, (FILE*)f);
+            continue;
+        }
+        // Remove any newline from the current line.
+        current_line[strcspn(current_line, "\n")] = 0;
+
+#if defined(LOG_KNOWLEDGE) && LOG_KNOWLEDGE
+    printf("\nCURRENT LINE (%s)\n", current_line);
+#endif
+
+        int intent = try_determine_intent(current_line);
+
+        if (intent != EMPTY){
+            // Change intent type, and go next line.
+            curr_intent_type = intent;
+
+#if defined(LOG_KNOWLEDGE) && LOG_KNOWLEDGE
+    printf("INTENT CHANGE (%d)\n", curr_intent_type);
+#endif
             continue;
         }
 
-        int intent = try_determine_intent(current_line);
-        if (intent != NULL){
-            // Change intent type.
-            curr_intent_type = intent;
-        }
-
         struct entityValue curr_entityValue;
-        if (!try_get_entityValue(current_line, MAX_INPUT, curr_intent_type, &curr_entityValue)){
-            // Failed to get entityvalue
+        if (!try_get_entityValue(current_line, MAX_INPUT, curr_intent_type, &curr_entityValue) || !try_insertReplace_cache(curr_entityValue)){
+            // Failed to get entityvalue, or failed to insert into cache.
             // TODO: error message or smth.
             --readed_pairs;
-        } else if (!try_insertReplace_cache(curr_entityValue)){
-            // Failed to insert into cache
-            // TODO: error message
-            --readed_pairs;
         }
-
         ++readed_pairs;
-        // Read next line.
-        fgets(current_line, MAX_INPUT, (FILE*)f);
 	}
+
+#if defined(LOG_KNOWLEDGE) && LOG_KNOWLEDGE
+    printf("\nLOADED CACHE, PRINTING...\n");
+	print_cache();
+#endif
+
+#if defined(TEST_CASE) && TEST_CASE
+    // Test Cache search (Based on INF1002.ini)
+    struct entityValue test_case;
+    if (try_get_entityValue_by(WHO, "Frank Guan", &test_case)) {
+        printf("\n\nTEST CASE (%d :: ", test_case.intent);
+        printf("%s = ", test_case.entity);
+        printf("%s)\n", test_case.description);
+
+        // Test replacing...
+        strncpy(test_case.description, "Blin", 256);
+        if (try_insertReplace_cache(test_case)){
+            printf("REPLACE SUCCESS CODE\n\n");
+            if (try_get_entityValue_by(WHO, "Frank Guan", &test_case)) {
+                printf("CHECK REPLACE (%d :: ", test_case.intent);
+                printf("%s = ", test_case.entity);
+                printf("%s)\n", test_case.description);
+            }
+        }
+    }
+#endif
 
 	return readed_pairs;
 }

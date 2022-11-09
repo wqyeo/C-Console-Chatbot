@@ -189,6 +189,15 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     char* file_name = concatenate(2, inv[linking_verb_flag + 1], ".ini");
     strncpy(response, concatenate(3, "Loading configuration from '", file_name, "'.\n"), n);
 
+#pragma region DEBUG
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+       printf("Current working directory: %s\n", cwd);
+    } else {
+       perror("getcwd() error");
+    }
+#pragma endregion
+
     FILE* ini_file;
     ini_file = fopen(file_name, "r");
 
@@ -203,6 +212,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     if (readed_count > 0){
         char buffer[MAX_RESPONSE];
         sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
+        strncpy(response, concatenate(2, response, buffer), n);
     } else {
         strncpy(response, concatenate(2, response, "The given file is invalid. No knowledge was loaded."), n);
     }
