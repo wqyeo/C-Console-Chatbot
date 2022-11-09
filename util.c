@@ -3,7 +3,7 @@
 
 #pragma region Knowledge Utils
 // Determine intent from string
-// NULL if invalid.
+// EMPTY if invalid.
 int try_determine_intent(char* input){
     if (strcmp(input, "[what]") == 0){
         return WHAT;
@@ -13,37 +13,52 @@ int try_determine_intent(char* input){
         return WHO;
     }
 
-    return NULL;
+    return EMPTY;
 }
 
 bool try_get_entityValue(char* input, int input_size, enum intentType intent_type, struct entityValue* result){
     result->intent = intent_type;
 
     bool found_equal_sign = false;
-
     int entity_size_count = 0;
 
     int i;
-    for (i = 0; i < input_size; ++i){
+    int description_index_diff = 0;
+    for (i = 0; i < input_size && input[i] != '\0'; ++i){
         if (entity_size_count > MAX_ENTITY){
             // Out of space to store entity.
             return false;
         }
 
-        if (i == '='){
+        if (input[i] == '=' && !found_equal_sign){
+            // Found first equal sign, stop adding to entity.
+            // Now we start adding to description.
             found_equal_sign = true;
-            result->entity[i] = '\0';
+            description_index_diff = i + 1;
+            if (i < MAX_ENTITY) {
+                // end if there is still space.
+                result->entity[i] = '\0';
+            }
             continue;
         }
 
         if (found_equal_sign){
             // Desc is everything after the '=' sign.
-            result->description[i] = input[i];
+            result->description[i - description_index_diff] = input[i];
         } else {
             // entity is everything before.
             result->entity[i] = input[i];
             ++entity_size_count;
         }
+    }
+
+    if (!found_equal_sign){
+        // Description was not filled in.
+        return false;
+    }
+    if (i < MAX_RESPONSE) {
+        // End description if there is still space.
+        result->description[i - description_index_diff] = '\0';
     }
 
     return true;
@@ -94,6 +109,22 @@ char* try_get_description(char* input, int size){
 
 #pragma region Entity Cache Utils
 
+// Mostly for debugging
+void print_cache(){
+    int i;
+    for (i = 0; i < MAX_ENTITY_CACHE; ++i){
+        if (entity_cache[i].intent == EMPTY || entity_cache[i].intent == NULL){
+            // Hit the end;
+            return;
+        }
+
+        printf("%d :: ", entity_cache[i].intent);
+        printf("%s=", entity_cache[i].entity);
+        printf("%s\n\0", entity_cache[i].description);
+    }
+    return;
+}
+
 bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, struct entityValue* result) {
     int i;
     for (i = 0; i < MAX_ENTITY_CACHE; ++i){
@@ -104,7 +135,11 @@ bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, stru
 
         if (strcmp(entity_cache[i].entity, entity_name) == 0 && intent_type == entity_cache[i].intent){
             // Found that fits condition.
-            result = &(entity_cache[i]);
+            // TODO: Refactor, find a way to assign description/entity.
+
+            strncpy(result->description, entity_cache[i].description, MAX_RESPONSE);
+            strncpy(result->entity, entity_cache[i].entity, MAX_ENTITY);
+            result->intent = entity_cache[i].intent;
             return true;
         }
     }
@@ -124,12 +159,22 @@ bool try_insertReplace_cache(struct entityValue element){
                 // Expand the end, if there is still space.
                 entity_cache[i].intent = EMPTY;
             }
+#if defined(LOG_UTIL) && LOG_UTIL
+            printf("INSERT Cache (%d :: ", element.intent);
+            printf("%s = ", element.entity);
+            printf("%s)\n", element.description);
+#endif
             return true;
         }
 
         if (strcmp(entity_cache[i].entity, element.entity) == 0 && element.intent == entity_cache[i].intent) {
+#if defined(LOG_UTIL) && LOG_UTIL
+            printf("REPLACE Cache (%d :: ", element.intent);
+            printf("%s = ", element.entity);
+            printf("%s)\n", element.description);
+#endif
             // Found a conflicting entity/element, replace instead.
-            entity_cache[i] = element;
+            strncpy(entity_cache[i].description, element.description, MAX_RESPONSE);
             return true;
         }
     }

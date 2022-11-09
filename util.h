@@ -12,6 +12,7 @@ char* try_get_entity(char* input, int size);
 char* try_get_description(char* input, int size);
 
 // Utils with entity_cache.
+void print_cache();
 bool try_insertReplace_cache(struct entityValue element);
 bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, struct entityValue* result);
 int get_current_cache_size();
