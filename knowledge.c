@@ -159,7 +159,11 @@ void knowledge_reset() {
  *   f - the file
  */
 void knowledge_write(FILE *f) {
-
+    int i,h;
+    h = sizeof(entityValue);
+    for (i = 0; i < h; i++) {
+        fprintf(*f, concancate(entityValue[i].entity, "=", entityValue[i].description));
+    }
 	/* to be implemented */
 
 }
