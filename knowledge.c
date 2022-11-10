@@ -50,15 +50,25 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  *   response  - the response for this question and entity
  *
  * Returns:
- *   KB_FOUND, if successful
+ *   KB_OK, if successful
  *   KB_NOMEM, if there was a memory allocation failure
  *   KB_INVALID, if the intent is not a valid question word
  */
 int knowledge_put(const char *intent, const char *entity, const char *response) {
 
 	/* to be implemented */
+    // Check is valid question word, reutns KB_Invalid if it is
+    int UserIntent = try_determine_intent(intent);
+    if (UserIntent == EMPTY){
+    return KB_INVALID;
+    }
+    char description[] = concatenate(3,entity,"=",response); 
 
-	return KB_INVALID;
+    struct entityValue save_response = {intent,description,UserIntent};
+
+    if(try_insertReplace_cache(save_response)){return KB_OK;}
+    else{return KB_NOMEM;}
+
 
 }
 
