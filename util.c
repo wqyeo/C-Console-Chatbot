@@ -5,11 +5,11 @@
 // Determine intent from string
 // EMPTY if invalid.
 int try_determine_intent(char* input){
-    if (strcmp(input, "[what]") == 0){
+    if (strcmp(input, "[what]") == 0 || strcmp(input, "what") == 0){
         return WHAT;
-    } else if (strcmp(input, "[where]") == 0) {
+    } else if (strcmp(input, "[where]") == 0|| strcmp(input, "where") == 0) {
         return WHERE;
-    } else if (strcmp(input, "[who]") == 0){
+    } else if (strcmp(input, "[who]") == 0|| strcmp(input, "who") == 0){
         return WHO;
     }
 
@@ -105,6 +105,27 @@ char* try_get_description(char* input, int size){
     }
     return result;
 }
+
+
+bool is_linking_verb(const char *input){
+    int linking_verbs_size = 3;
+    char* linking_verb[] = {
+        "are",
+        "is",
+        "was"
+    };
+
+    int i;
+    for (i = 0; i < linking_verbs_size; ++i){
+        if (compare_token(linking_verb[i], input) == 0){
+            // The input is one of the linking verbs.
+            return true;
+        }
+    }
+    // Doesnt exist in any of the linking verbs.
+    return false;
+}
+
 #pragma endregion
 
 #pragma region Entity Cache Utils
@@ -125,18 +146,19 @@ void print_cache(){
     return;
 }
 
-bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, struct entityValue* result) {
+bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, struct entityValue *result) {
     int i;
     for (i = 0; i < MAX_ENTITY_CACHE; ++i){
-        if (entity_cache[i].intent == NULL || entity_cache[i].intent == EMPTY){
+        if (entity_cache[i].intent == EMPTY || entity_cache[i].intent == NULL){
             // Hit the end; Probably doesn't exists.
             return false;
         }
+#if defined(LOG_UTIL) && LOG_UTIL
+        printf("\FETCH COMPARE (%s against %s)\n", entity_cache[i].entity, entity_name);
+#endif
 
         if (strcmp(entity_cache[i].entity, entity_name) == 0 && intent_type == entity_cache[i].intent){
             // Found that fits condition.
-            // TODO: Refactor, find a way to assign description/entity.
-
             strncpy(result->description, entity_cache[i].description, MAX_RESPONSE);
             strncpy(result->entity, entity_cache[i].entity, MAX_ENTITY);
             result->intent = entity_cache[i].intent;
@@ -149,11 +171,16 @@ bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, stru
 
 // Insert at end. Replace description if conflicting entity+intent is found.
 bool try_insertReplace_cache(struct entityValue element){
+    // Loop through, find either a conflicting to replace
+    // or an empty slot to insert into.
     int i;
     for (i = 0; i < MAX_ENTITY_CACHE; ++i){
-        if (entity_cache[i].intent == NULL || entity_cache[i].intent == EMPTY){
-            // Add at the end.
-            entity_cache[i] = element;
+        if (entity_cache[i].intent == EMPTY || entity_cache[i].intent == NULL){
+            // Empty slot found, insert.
+            entity_cache[i].intent = element.intent;
+            strncpy(entity_cache[i].description, element.description, MAX_RESPONSE);
+            strncpy(entity_cache[i].entity, element.entity, MAX_ENTITY);
+
             ++i;
             if (i < MAX_ENTITY_CACHE){
                 // Expand the end, if there is still space.
@@ -168,17 +195,18 @@ bool try_insertReplace_cache(struct entityValue element){
         }
 
         if (strcmp(entity_cache[i].entity, element.entity) == 0 && element.intent == entity_cache[i].intent) {
+            // Found a conflicting entity/element, replace instead.
 #if defined(LOG_UTIL) && LOG_UTIL
             printf("REPLACE Cache (%d :: ", element.intent);
             printf("%s = ", element.entity);
             printf("%s)\n", element.description);
 #endif
-            // Found a conflicting entity/element, replace instead.
             strncpy(entity_cache[i].description, element.description, MAX_RESPONSE);
             return true;
         }
     }
 
+    // Ran out of space.
     return false;
 }
 
@@ -192,4 +220,5 @@ int get_current_cache_size(){
     }
     return i;
 }
+
 #pragma endregion

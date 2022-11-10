@@ -31,11 +31,42 @@
  *   KB_NOTFOUND, if no response could be found
  *   KB_INVALID, if 'intent' is not a recognised question word
  */
-int knowledge_get(const char *intent, const char *entity, char *response, int n) {
+enum KB_Code knowledge_get(enum KB_Code intent, const char *entity, char *response, int n) {
 
-	/* to be implemented */
+    if (intent == EMPTY){
+        // Unknown intent
+        strncpy(response, "Unknown intent.\nHint: Where, Who, What", n);
+        return KB_INVALID;
+    }
 
-	return KB_NOTFOUND;
+    struct entityValue found_response;
+	if (!try_get_entityValue_by(intent, entity, &found_response)){
+        // Not found.
+        printf("%s: I do not know how to respond to that. Please let me know how to respond:\n", chatbot_botname());
+
+        // Get response
+        char response_input[MAX_RESPONSE];
+        fgets(response_input, MAX_RESPONSE, stdin);
+        // This removes the newline from the response (when user hits enter).
+        response_input[strlen(response_input) - 1] = '\0';
+
+        // Store Response
+        enum KB_Code return_code;
+        return_code = knowledge_put(intent, entity, response_input);
+
+        if (return_code == KB_NOTFOUND){
+            strncpy(response, "oof", n);
+        } else if (return_code == KB_NOMEM){
+            strncpy(response, "I ran out of memory to store more information!", n);
+        } else if (return_code == KB_OK) {
+            strncpy(response, concatenate(5, "Got it, I will respond to '", entity, "' with '", response_input, "'."), n);
+        }
+
+        return return_code;
+	}
+	// Else, if we found a response, just echo
+    strncpy(response, found_response.description, n);
+	return KB_OK;
 }
 
 
@@ -54,12 +85,28 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  *   KB_NOMEM, if there was a memory allocation failure
  *   KB_INVALID, if the intent is not a valid question word
  */
-int knowledge_put(const char *intent, const char *entity, const char *response) {
+enum KB_Code knowledge_put(enum KB_Code intent, const char *entity, const char *response) {
 
-	/* to be implemented */
+    if (is_whitespace_or_empty(response, strlen(response))){
+        return KB_NOTFOUND;
+    }
 
-	return KB_INVALID;
+    // Create object and fill.
+    struct entityValue to_store;
+    to_store.intent = intent;
+    strncpy(to_store.entity, entity, MAX_ENTITY);
+    strncpy(to_store.description, response, MAX_RESPONSE);
 
+    // Insert into cache.
+    if (!try_insertReplace_cache(to_store)){
+        // Fail to insert. Probably out of memory.
+#if defined(LOG_KNOWLEDGE) && LOG_KNOWLEDGE
+        printf("FAILED INSERT GET (%s)\n", response);
+#endif
+        return KB_NOMEM;
+    }
+
+	return KB_OK;
 }
 
 

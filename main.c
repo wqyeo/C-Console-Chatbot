@@ -62,9 +62,11 @@ int main(int argc, char *argv[]) {
 
 		/* invoke the chatbot */
 		done = chatbot_main(inc, inv, output, MAX_RESPONSE);
-		printf("%s: %s\n", chatbot_botname(), output);
-		// Clear response buffer
-		strncpy(output, "\0", MAX_RESPONSE);
+		if (!is_whitespace_or_empty(output, MAX_RESPONSE)){
+            printf("%s: %s\n", chatbot_botname(), output);
+            // Clear response buffer
+            strncpy(output, "\0", MAX_RESPONSE);
+		}
 
 	} while (!done);
 
@@ -167,24 +169,35 @@ char* concatenate(int args_count, ...) {
 
 
 bool is_whitespace_or_empty(const char *input, int size){
-    int empty_char_size = 4;
+    int empty_char_size = 3;
     char empty_chars[] = {
         ' ',
-        '\0',
         '\n',
         '\r'
     };
 
-    bool flag = true;
     int i;
     for (i = 0; i < size; ++i){
+        if (input[i] == '\0'){
+            // End of input, havent encounter any normal character.
+            return false;
+        }
+
+        // Check if the current character is a whitespace
+        bool current_is_whitespace = false;
         int j;
         for (j = 0; j < empty_char_size; ++j){
-            if (empty_chars[j] != input[i]){
-                // Input has a char that is not empty/whitespace.
-                return false;
+            if (empty_chars[j] == input[i]){
+                current_is_whitespace = true;
+                break;
             }
         }
+
+        // If the current char is not a whitespace
+        // then this string is not whitespace/empty.
+        if (!current_is_whitespace){
+            return false;
+        }
     }
-    return flag;
+    return true;
 }
