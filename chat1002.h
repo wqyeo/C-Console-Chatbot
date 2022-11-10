@@ -53,8 +53,8 @@ int chatbot_is_save(const char *intent);
 int chatbot_do_save(int inc, char *inv[], char *response, int n);
 
 /* functions defined in knowledge.c */
-enum KB_Code knowledge_get(int intent, const char *entity, char *response, int n);
-int knowledge_put(const char *intent, const char *entity, const char *response);
+enum KB_Code knowledge_get(enum KB_Code intent, const char *entity, char *response, int n);
+enum KB_Code knowledge_put(enum KB_Code intent, const char *entity, const char *response);
 void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);

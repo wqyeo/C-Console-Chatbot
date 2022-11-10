@@ -117,7 +117,7 @@ bool is_linking_verb(const char *input){
 
     int i;
     for (i = 0; i < linking_verbs_size; ++i){
-        if (compare_token(linking_verb[i], input)){
+        if (compare_token(linking_verb[i], input) == 0){
             // The input is one of the linking verbs.
             return true;
         }
@@ -125,6 +125,7 @@ bool is_linking_verb(const char *input){
     // Doesnt exist in any of the linking verbs.
     return false;
 }
+
 #pragma endregion
 
 #pragma region Entity Cache Utils
@@ -170,10 +171,12 @@ bool try_get_entityValue_by(enum intentType intent_type, char* entity_name, stru
 
 // Insert at end. Replace description if conflicting entity+intent is found.
 bool try_insertReplace_cache(struct entityValue element){
+    // Loop through, find either a conflicting to replace
+    // or an empty slot to insert into.
     int i;
     for (i = 0; i < MAX_ENTITY_CACHE; ++i){
         if (entity_cache[i].intent == EMPTY || entity_cache[i].intent == NULL){
-            // Add at the end.
+            // Empty slot found, insert.
             entity_cache[i].intent = element.intent;
             strncpy(entity_cache[i].description, element.description, MAX_RESPONSE);
             strncpy(entity_cache[i].entity, element.entity, MAX_ENTITY);
@@ -192,17 +195,18 @@ bool try_insertReplace_cache(struct entityValue element){
         }
 
         if (strcmp(entity_cache[i].entity, element.entity) == 0 && element.intent == entity_cache[i].intent) {
+            // Found a conflicting entity/element, replace instead.
 #if defined(LOG_UTIL) && LOG_UTIL
             printf("REPLACE Cache (%d :: ", element.intent);
             printf("%s = ", element.entity);
             printf("%s)\n", element.description);
 #endif
-            // Found a conflicting entity/element, replace instead.
             strncpy(entity_cache[i].description, element.description, MAX_RESPONSE);
             return true;
         }
     }
 
+    // Ran out of space.
     return false;
 }
 

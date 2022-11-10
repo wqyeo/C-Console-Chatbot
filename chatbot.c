@@ -321,7 +321,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_reset(const char *intent) {
-	return compare_token(intent, "reset");
+	return compare_token(intent, "reset") == 0;
 }
 
 
