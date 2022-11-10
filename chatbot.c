@@ -116,7 +116,7 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "exit" or "quit"
  *  0, otherwise
  */
-int chatbot_is_exit(const char *intent) {
+bool chatbot_is_exit(const char *intent) {
 
 	return compare_token(intent, "exit") == 0 || compare_token(intent, "quit") == 0;
 
@@ -151,8 +151,8 @@ int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "load"
  *  0, otherwise
  */
-int chatbot_is_load(const char *intent) {
-	return compare_token(intent, "load") == 0;
+bool chatbot_is_load(const char *intent) {
+	return (compare_token(intent, "load") == 0);
 }
 
 
@@ -189,14 +189,14 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     char* file_name = concatenate(2, inv[linking_verb_flag + 1], ".ini");
     strncpy(response, concatenate(3, "Loading configuration from '", file_name, "'.\n"), n);
 
-#pragma region DEBUG
+#if defined(LOG_CHATBOT) && LOG_CHATBOT
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
        printf("Current working directory: %s\n", cwd);
     } else {
        perror("getcwd() error");
     }
-#pragma endregion
+#endif
 
     FILE* ini_file;
     ini_file = fopen(file_name, "r");
@@ -232,7 +232,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "what", "where", or "who"
  *  0, otherwise
  */
-int chatbot_is_question(const char *intent) {
+bool chatbot_is_question(const char *intent) {
 	return compare_token(intent, "what") == 0 || compare_token(intent, "where") == 0 || compare_token(intent, "who") == 0;
 }
 
@@ -320,7 +320,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "reset"
  *  0, otherwise
  */
-int chatbot_is_reset(const char *intent) {
+bool chatbot_is_reset(const char *intent) {
 	return compare_token(intent, "reset") == 0;
 }
 
@@ -353,11 +353,11 @@ int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "what", "where", or "who"
  *  0, otherwise
  */
-int chatbot_is_save(const char *intent) {
+bool chatbot_is_save(const char *intent) {
 
 	/* to be implemented */
 
-	return 0;
+	return false;
 
 }
 

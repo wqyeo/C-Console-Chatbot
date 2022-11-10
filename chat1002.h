@@ -24,11 +24,6 @@
 #define MAX_RESPONSE 256
 
 /* return codes for knowledge_get() and knowledge_put() */
-//#define KB_OK        0
-//#define KB_NOTFOUND -1
-//#define KB_INVALID  -2
-//#define KB_NOMEM    -3
-
 enum KB_Code { KB_NOMEM = -3, KB_INVALID = -2, KB_NOTFOUND = -1, KB_OK = 0 };
 
 /* functions defined in main.c */
@@ -41,15 +36,15 @@ bool is_whitespace_or_empty(const char *input, int size);
 const char *chatbot_botname();
 const char *chatbot_username();
 int chatbot_main(int inc, char *inv[], char *response, int n);
-int chatbot_is_exit(const char *intent);
+bool chatbot_is_exit(const char *intent);
 int chatbot_do_exit(int inc, char *inv[], char *response, int n);
-int chatbot_is_load(const char *intent);
+bool chatbot_is_load(const char *intent);
 int chatbot_do_load(int inc, char *inv[], char *response, int n);
-int chatbot_is_question(const char *intent);
+bool chatbot_is_question(const char *intent);
 int chatbot_do_question(int inc, char *inv[], char *response, int n);
-int chatbot_is_reset(const char *intent);
+bool chatbot_is_reset(const char *intent);
 int chatbot_do_reset(int inc, char *inv[], char *response, int n);
-int chatbot_is_save(const char *intent);
+bool chatbot_is_save(const char *intent);
 int chatbot_do_save(int inc, char *inv[], char *response, int n);
 
 /* functions defined in knowledge.c */
