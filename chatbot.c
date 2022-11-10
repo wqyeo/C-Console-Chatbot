@@ -233,7 +233,7 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_question(const char *intent) {
-	return compare_token(intent, "what") == 0 || compare_token(intent, "where") == 0 || compare_token(intent, "who");
+	return compare_token(intent, "what") == 0 || compare_token(intent, "where") == 0 || compare_token(intent, "who") == 0;
 }
 
 
@@ -260,7 +260,8 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 
     // Check "is" or "are".
     int linking_verb_flag = 0;
-    if (compare_token(inv[1], "is") == 0 || compare_token(inv[1], "are") == 0){
+    if (is_linking_verb(inv[1])){
+        // TODO: Should we force linking verbs?
         linking_verb_flag = 1;
     }
 
@@ -270,7 +271,41 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
         return 0;
     }
 
-    // TODO: Check entity and answer.
+    char input_entity[MAX_ENTITY];
+    int i;
+    int entity_index = 0;
+    // TODO: REFACTOR
+    // Get the entire entity name
+    // (Everything after question and linking-verb)
+    for (i = 1 + linking_verb_flag; i < inc; ++i) {
+        // Foreach word, append character-by-character
+        char* current = inv[i];
+        int j;
+        for (j = 0; j < strlen(current); ++j){
+            if (entity_index >= MAX_ENTITY) {
+                strncpy(response, "Hit entity name limit!", n);
+                return 0;
+            }
+            input_entity[entity_index] = current[j];
+            ++entity_index;
+        }
+
+        // Check if there is space to add a whitespace
+        // between each word.
+        if (entity_index >= MAX_ENTITY) {
+            strncpy(response, "Hit entity name limit!", n);
+            return 0;
+        }
+        input_entity[entity_index] = ' ';
+        ++entity_index;
+    }
+    --entity_index;
+    if (entity_index < MAX_ENTITY) {
+        // end if there is still space to do so.
+        input_entity[entity_index] = '\0';
+    }
+
+    enum KB_Code return_code = knowledge_get(try_determine_intent(inv[0]), input_entity, response, n);
 	return 0;
 }
 

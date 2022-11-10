@@ -31,11 +31,46 @@
  *   KB_NOTFOUND, if no response could be found
  *   KB_INVALID, if 'intent' is not a recognised question word
  */
-int knowledge_get(const char *intent, const char *entity, char *response, int n) {
+enum KB_Code knowledge_get(int intent, const char *entity, char *response, int n) {
 
-	/* to be implemented */
+    if (intent == EMPTY){
+        // Unknown intent
+        strncpy(response, "Unknown intent.\nHint: Where, Who, What", n);
+        return KB_INVALID;
+    }
 
-	return KB_NOTFOUND;
+    struct entityValue found_response;
+	if (!try_get_entityValue_by(intent, entity, &found_response)){
+        // Not found.
+        printf("Give response:\n");
+
+        // Get response
+        char input[MAX_RESPONSE];
+        fgets(input, MAX_RESPONSE, stdin);
+
+        if (is_whitespace_or_empty(input, strlen(input))){
+            // Response was whitespace/empty.
+            strncpy(response, "Oof\n", n);
+            return KB_NOTFOUND;
+        }
+
+        found_response.intent = intent;
+        strncpy(found_response.entity, entity, MAX_ENTITY);
+        strncpy(found_response.description, input, MAX_RESPONSE);
+        if (!try_insertReplace_cache(found_response)){
+            // Fail to insert.
+#if defined(LOG_KNOWLEDGE) && LOG_KNOWLEDGE
+            printf("FAILED INSERT GET (%s)\n", input);
+#endif
+            return KB_INVALID;
+        }
+
+        strncpy(response, concatenate(4, "Got it, ", entity, " will now be ", input), n);
+        return KB_OK;
+	}
+	// Else, if we found a response, just echo
+    strncpy(response, found_response.description, n);
+	return KB_OK;
 }
 
 
@@ -59,7 +94,6 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 	/* to be implemented */
 
 	return KB_INVALID;
-
 }
 
 

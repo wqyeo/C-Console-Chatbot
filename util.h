@@ -1,10 +1,11 @@
 #ifndef UTIL_H_INCLUDED
-#define UTIL_H_INCLUDED
+#define UTIL_H_INCLUDEDE:\GITLOCAL\ConsoleChatbot\util.c
 
 #include "entityvalue.h"
 
 int try_determine_intent(char* input);
 bool try_get_entityValue(char* input, int input_size, enum intentType intent_type, struct entityValue* result);
+bool is_linking_verb(const char *input);
 
 //[[deprecated]]
 char* try_get_entity(char* input, int size);

@@ -24,10 +24,12 @@
 #define MAX_RESPONSE 256
 
 /* return codes for knowledge_get() and knowledge_put() */
-#define KB_OK        0
-#define KB_NOTFOUND -1
-#define KB_INVALID  -2
-#define KB_NOMEM    -3
+//#define KB_OK        0
+//#define KB_NOTFOUND -1
+//#define KB_INVALID  -2
+//#define KB_NOMEM    -3
+
+enum KB_Code { KB_NOMEM = -3, KB_INVALID = -2, KB_NOTFOUND = -1, KB_OK = 0 };
 
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
@@ -51,7 +53,7 @@ int chatbot_is_save(const char *intent);
 int chatbot_do_save(int inc, char *inv[], char *response, int n);
 
 /* functions defined in knowledge.c */
-int knowledge_get(const char *intent, const char *entity, char *response, int n);
+enum KB_Code knowledge_get(int intent, const char *entity, char *response, int n);
 int knowledge_put(const char *intent, const char *entity, const char *response);
 void knowledge_reset();
 int knowledge_read(FILE *f);
