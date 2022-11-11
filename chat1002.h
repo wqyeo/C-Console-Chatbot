@@ -23,6 +23,9 @@
 /* the maximum number of characters allowed in a response (including the terminating null) */
 #define MAX_RESPONSE 256
 
+// Maximum number of characters allowed for a file name.
+#define MAX_FILE_NAME 32
+
 /* return codes for knowledge_get() and knowledge_put() */
 enum KB_Code { KB_NOMEM = -3, KB_INVALID = -2, KB_NOTFOUND = -1, KB_OK = 0 };
 

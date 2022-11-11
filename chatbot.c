@@ -270,12 +270,14 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
         return 0;
     }
 
-
-
+    // Get entity
     char input_entity[MAX_ENTITY];
-    try_combine(inv, ' ', 1 + linking_verb_flag, inc, MAX_ENTITY, input_entity);
+    if (try_combine(inv, ' ', 1 + linking_verb_flag, inc, MAX_ENTITY, input_entity)) {
+        knowledge_get(try_determine_intent(inv[0]), input_entity, response, n);
+    } else {
+        strncpy(response, "I ran out of space to process the entity name...", n);
+    }
 
-    enum KB_Code return_code = knowledge_get(try_determine_intent(inv[0]), input_entity, response, n);
 	return 0;
 }
 
@@ -341,10 +343,43 @@ bool chatbot_is_save(const char *intent) {
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 
     if (inc < 2){
-        strncpy(response, "I need a file name to save under.\n(Do not include '.ini')", n);
+        // No params after command.
+        strncpy(response, "I need a file name to save under.\nExample: 'Save to INF1002'.\nHINT: Do not include '.ini'", n);
+        return 0;
     }
 
+    int linking_verb_flag = 0;
+    if (compare_token(inv[1], "to") == 0){
+        linking_verb_flag = 1;
+    }
 
+    if (linking_verb_flag == 1 && inc < 3){
+        // No file name given.
+        strncpy(response, "I need a file name to save under.\nExample: 'Save to INF1002'.\nHINT: Do not include '.ini'", n);
+        return 0;
+    }
+
+    // +5 for extension
+    char file_name[MAX_FILE_NAME + 5];
+    if (try_combine(inv, '_', 1 + linking_verb_flag, inc, MAX_FILE_NAME, file_name)){
+        // Append file extension
+        strncpy(file_name, concatenate(2, file_name, ".ini"), MAX_FILE_NAME + 5);
+
+        FILE *fp;
+        if((fp = fopen(file_name,"r"))!=NULL) {
+            // If file exists already, warn overwrite.
+            fclose(fp);
+            printf("WARN: the file '%s' exists before, it will be overwritten...\n", file_name);
+        }
+
+        fp = fopen(file_name, "w+");
+        knowledge_write(fp);
+        fclose(fp);
+
+        strncpy(response, concatenate(3, "Saved my current knowledge to '", file_name, "'."), n);
+    } else {
+        strncpy(response, "File name is too long!\nHINT: Do not include '.ini'", n);
+    }
 
 	return 0;
 
