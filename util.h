@@ -6,6 +6,7 @@
 int try_determine_intent(char* input);
 bool try_get_entityValue(char* input, int input_size, enum intentType intent_type, struct entityValue* result);
 bool is_linking_verb(const char *input);
+bool try_combine(char *str_arr[], char combine_with, int start_index, int end_index, int max_output_length, char* result);
 
 //[[deprecated]]
 char* try_get_entity(char* input, int size);

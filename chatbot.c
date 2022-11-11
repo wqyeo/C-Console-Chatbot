@@ -239,8 +239,7 @@ bool chatbot_is_question(const char *intent) {
 
 /*
  * Answer a question.
- *
- * inv[0] contains the the question word.
+ * * inv[0] contains the the question word.
  * inv[1] may contain "is" or "are"; if so, it is skipped.
  * The remainder of the words form the entity.
  *
@@ -271,39 +270,10 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
         return 0;
     }
 
-    char input_entity[MAX_ENTITY];
-    int i;
-    int entity_index = 0;
-    // TODO: REFACTOR
-    // Get the entire entity name
-    // (Everything after question and linking-verb)
-    for (i = 1 + linking_verb_flag; i < inc; ++i) {
-        // Foreach word, append character-by-character
-        char* current = inv[i];
-        int j;
-        for (j = 0; j < strlen(current); ++j){
-            if (entity_index >= MAX_ENTITY) {
-                strncpy(response, "Hit entity name limit!", n);
-                return 0;
-            }
-            input_entity[entity_index] = current[j];
-            ++entity_index;
-        }
 
-        // Check if there is space to add a whitespace
-        // between each word.
-        if (entity_index >= MAX_ENTITY) {
-            strncpy(response, "Hit entity name limit!", n);
-            return 0;
-        }
-        input_entity[entity_index] = ' ';
-        ++entity_index;
-    }
-    --entity_index;
-    if (entity_index < MAX_ENTITY) {
-        // end if there is still space to do so.
-        input_entity[entity_index] = '\0';
-    }
+
+    char input_entity[MAX_ENTITY];
+    try_combine(inv, ' ', 1 + linking_verb_flag, inc, MAX_ENTITY, input_entity);
 
     enum KB_Code return_code = knowledge_get(try_determine_intent(inv[0]), input_entity, response, n);
 	return 0;
@@ -355,10 +325,7 @@ int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
  */
 bool chatbot_is_save(const char *intent) {
 
-	/* to be implemented */
-
-	return false;
-
+    return compare_token(intent, "save") == 0;
 }
 
 
@@ -373,7 +340,11 @@ bool chatbot_is_save(const char *intent) {
  */
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 
-	/* to be implemented */
+    if (inc < 2){
+        strncpy(response, "I need a file name to save under.\n(Do not include '.ini')", n);
+    }
+
+
 
 	return 0;
 

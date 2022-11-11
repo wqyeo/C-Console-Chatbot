@@ -16,6 +16,7 @@
 					<Add option="-DLOG_UTIL=1" />
 					<Add option="-DLOG_KNOWLEDGE=1" />
 					<Add option="-DTEST_CASE=1" />
+					<Add option="-DLOG_CHATBOT=1" />
 					<Add directory="include" />
 				</Compiler>
 			</Target>

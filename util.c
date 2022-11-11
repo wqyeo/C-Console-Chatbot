@@ -126,6 +126,43 @@ bool is_linking_verb(const char *input){
     return false;
 }
 
+// Combine a string array into 1 single string.
+// False if the combination failed due to space issue or invalid params.
+bool try_combine(char *str_arr[], char combine_with, int start_index, int end_index, int max_output_length, char* result) {
+    if (end_index < start_index) {
+        return false;
+    }
+
+    int i;
+    int result_index = 0;
+    for (i = start_index; i < end_index; ++i) {
+        // Foreach string, append character-by-character
+        char* current = str_arr[i];
+        int j;
+        for (j = 0; j < strlen(current); ++j){
+            if (result_index >= max_output_length) {
+                return false;
+            }
+            result[result_index] = current[j];
+            ++result_index;
+        }
+
+        // Check if there is space to add the combinator
+        // between each string.
+        if (result_index >= max_output_length) {
+            return false;
+        }
+        result[result_index] = combine_with;
+        ++result_index;
+    }
+    // -1 since we want to replace the last combinator
+    // with the end string.
+    --result_index;
+    result[result_index] = '\0';
+
+    return true;
+}
+
 #pragma endregion
 
 #pragma region Entity Cache Utils
