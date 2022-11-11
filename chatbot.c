@@ -184,11 +184,6 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
         return 0;
     }
 
-    // TODO: Check if the user gave a '.ini' at the end.
-    // Append if not, else do nothing.
-    char* file_name = concatenate(2, inv[linking_verb_flag + 1], ".ini");
-    strncpy(response, concatenate(3, "Loading configuration from '", file_name, "'.\n"), n);
-
 #if defined(LOG_CHATBOT) && LOG_CHATBOT
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -198,27 +193,35 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
     }
 #endif
 
-    FILE* ini_file;
-    ini_file = fopen(file_name, "r");
+    // +5, space for file extension
+    char file_name[MAX_RESPONSE +5];
+    if (try_combine(inv, ' ', 1 + linking_verb_flag, inc, MAX_RESPONSE, file_name)){
+        // Append file extension
+        strncpy(file_name, concatenate(2, file_name, ".ini"), MAX_RESPONSE + 5);
+        printf("Loading configuration from '%s'.\n", file_name);
 
-    if (ini_file == NULL) {
-        // Failed to open file; Probably doesn't exists.
-        strncpy(response, concatenate(2, response, "\nFailed to load file. Does the configuration exists?\n(HINT: Do not add '.ini')"), n);
-        return 0;
-    }
+        // Read and load
+        FILE* ini_file;
+        ini_file = fopen(file_name, "r");
+        if (ini_file == NULL) {
+            strncpy(response, "The given file does not exists!\nHINT: Do not include '.ini'.", n);
+            return 0;
+        }
 
-    // Read and load
-    int readed_count = knowledge_read(ini_file);
-    if (readed_count > 0){
-        char buffer[MAX_RESPONSE];
-        sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
-        strncpy(response, concatenate(2, response, buffer), n);
+        int readed_count = knowledge_read(ini_file);
+        fclose(ini_file);
+
+        if (readed_count > 0){
+            char buffer[MAX_RESPONSE];
+            sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
+            strncpy(response, buffer, n);
+        } else {
+            strncpy(response, concatenate(2, response, "The given file is either invalid or has no information. No knowledge was loaded."), n);
+        }
     } else {
-        strncpy(response, concatenate(2, response, "The given file is invalid. No knowledge was loaded."), n);
+        strncpy(response, "File name is too long!\nHINT: Do not include '.ini'", n);
     }
-
-    fclose(ini_file);
-	return 0;
+    return 0;
 }
 
 
