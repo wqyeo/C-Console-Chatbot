@@ -193,9 +193,7 @@ int knowledge_read(FILE *f) {
  * Reset the knowledge base, removing all know entitities from all intents.
  */
 void knowledge_reset() {
-
-	/* to be implemented */
-
+    entity_cache[0].intent = EMPTY;
 }
 
 

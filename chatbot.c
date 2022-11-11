@@ -307,11 +307,9 @@ bool chatbot_is_reset(const char *intent) {
  *   0 (the chatbot always continues chatting after beign reset)
  */
 int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
-
-	/* to be implemented */
-
+	knowledge_reset();
+	strncpy(response, "I forgotten everything.", n);
 	return 0;
-
 }
 
 
@@ -359,7 +357,7 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
         return 0;
     }
 
-    // +5 for extension
+    // +5, space for file extension
     char file_name[MAX_FILE_NAME + 5];
     if (try_combine(inv, '_', 1 + linking_verb_flag, inc, MAX_FILE_NAME, file_name)){
         // Append file extension
@@ -372,6 +370,7 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
             printf("WARN: the file '%s' exists before, it will be overwritten...\n", file_name);
         }
 
+        // Open and write
         fp = fopen(file_name, "w+");
         knowledge_write(fp);
         fclose(fp);
