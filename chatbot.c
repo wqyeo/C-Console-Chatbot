@@ -116,7 +116,7 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "exit" or "quit"
  *  0, otherwise
  */
-int chatbot_is_exit(const char *intent) {
+bool chatbot_is_exit(const char *intent) {
 
 	return compare_token(intent, "exit") == 0 || compare_token(intent, "quit") == 0;
 
@@ -151,8 +151,8 @@ int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "load"
  *  0, otherwise
  */
-int chatbot_is_load(const char *intent) {
-	return compare_token(intent, "load") == 0;
+bool chatbot_is_load(const char *intent) {
+	return (compare_token(intent, "load") == 0);
 }
 
 
@@ -184,41 +184,44 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
         return 0;
     }
 
-    // TODO: Check if the user gave a '.ini' at the end.
-    // Append if not, else do nothing.
-    char* file_name = concatenate(2, inv[linking_verb_flag + 1], ".ini");
-    strncpy(response, concatenate(3, "Loading configuration from '", file_name, "'.\n"), n);
-
-#pragma region DEBUG
+#if defined(LOG_CHATBOT) && LOG_CHATBOT
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
        printf("Current working directory: %s\n", cwd);
     } else {
        perror("getcwd() error");
     }
-#pragma endregion
+#endif
 
-    FILE* ini_file;
-    ini_file = fopen(file_name, "r");
+    // +5, space for file extension
+    char file_name[MAX_RESPONSE +5];
+    if (try_combine(inv, ' ', 1 + linking_verb_flag, inc, MAX_RESPONSE, file_name)){
+        // Append file extension
+        strncpy(file_name, concatenate(2, file_name, ".ini"), MAX_RESPONSE + 5);
+        printf("Loading configuration from '%s'.\n", file_name);
 
-    if (ini_file == NULL) {
-        // Failed to open file; Probably doesn't exists.
-        strncpy(response, concatenate(2, response, "\nFailed to load file. Does the configuration exists?\n(HINT: Do not add '.ini')"), n);
-        return 0;
-    }
+        // Read and load
+        FILE* ini_file;
+        ini_file = fopen(file_name, "r");
+        if (ini_file == NULL) {
+            strncpy(response, "The given file does not exists!\nHINT: Do not include '.ini'.", n);
+            return 0;
+        }
 
-    // Read and load
-    int readed_count = knowledge_read(ini_file);
-    if (readed_count > 0){
-        char buffer[MAX_RESPONSE];
-        sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
-        strncpy(response, concatenate(2, response, buffer), n);
+        int readed_count = knowledge_read(ini_file);
+        fclose(ini_file);
+
+        if (readed_count > 0){
+            char buffer[MAX_RESPONSE];
+            sprintf(buffer, "Loaded %d knowledge from configuration.", readed_count);
+            strncpy(response, buffer, n);
+        } else {
+            strncpy(response, concatenate(2, response, "The given file is either invalid or has no information. No knowledge was loaded."), n);
+        }
     } else {
-        strncpy(response, concatenate(2, response, "The given file is invalid. No knowledge was loaded."), n);
+        strncpy(response, "File name is too long!\nHINT: Do not include '.ini'", n);
     }
-
-    fclose(ini_file);
-	return 0;
+    return 0;
 }
 
 
@@ -232,15 +235,14 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "what", "where", or "who"
  *  0, otherwise
  */
-int chatbot_is_question(const char *intent) {
+bool chatbot_is_question(const char *intent) {
 	return compare_token(intent, "what") == 0 || compare_token(intent, "where") == 0 || compare_token(intent, "who") == 0;
 }
 
 
 /*
  * Answer a question.
- *
- * inv[0] contains the the question word.
+ * * inv[0] contains the the question word.
  * inv[1] may contain "is" or "are"; if so, it is skipped.
  * The remainder of the words form the entity.
  *
@@ -271,41 +273,14 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
         return 0;
     }
 
+    // Get entity
     char input_entity[MAX_ENTITY];
-    int i;
-    int entity_index = 0;
-    // TODO: REFACTOR
-    // Get the entire entity name
-    // (Everything after question and linking-verb)
-    for (i = 1 + linking_verb_flag; i < inc; ++i) {
-        // Foreach word, append character-by-character
-        char* current = inv[i];
-        int j;
-        for (j = 0; j < strlen(current); ++j){
-            if (entity_index >= MAX_ENTITY) {
-                strncpy(response, "Hit entity name limit!", n);
-                return 0;
-            }
-            input_entity[entity_index] = current[j];
-            ++entity_index;
-        }
-
-        // Check if there is space to add a whitespace
-        // between each word.
-        if (entity_index >= MAX_ENTITY) {
-            strncpy(response, "Hit entity name limit!", n);
-            return 0;
-        }
-        input_entity[entity_index] = ' ';
-        ++entity_index;
-    }
-    --entity_index;
-    if (entity_index < MAX_ENTITY) {
-        // end if there is still space to do so.
-        input_entity[entity_index] = '\0';
+    if (try_combine(inv, ' ', 1 + linking_verb_flag, inc, MAX_ENTITY, input_entity)) {
+        knowledge_get(try_determine_intent(inv[0]), input_entity, response, n);
+    } else {
+        strncpy(response, "I ran out of space to process the entity name...", n);
     }
 
-    enum KB_Code return_code = knowledge_get(try_determine_intent(inv[0]), input_entity, response, n);
 	return 0;
 }
 
@@ -320,7 +295,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "reset"
  *  0, otherwise
  */
-int chatbot_is_reset(const char *intent) {
+bool chatbot_is_reset(const char *intent) {
 	return compare_token(intent, "reset") == 0;
 }
 
@@ -335,11 +310,9 @@ int chatbot_is_reset(const char *intent) {
  *   0 (the chatbot always continues chatting after beign reset)
  */
 int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
-
-	/* to be implemented */
-
+	knowledge_reset();
+	strncpy(response, "I forgotten everything.", n);
 	return 0;
-
 }
 
 
@@ -353,12 +326,9 @@ int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
  *  1, if the intent is "what", "where", or "who"
  *  0, otherwise
  */
-int chatbot_is_save(const char *intent) {
+bool chatbot_is_save(const char *intent) {
 
-	/* to be implemented */
-
-	return 0;
-
+    return compare_token(intent, "save") == 0;
 }
 
 
@@ -373,7 +343,45 @@ int chatbot_is_save(const char *intent) {
  */
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 
-	/* to be implemented */
+    if (inc < 2){
+        // No params after command.
+        strncpy(response, "I need a file name to save under.\nExample: 'Save to INF1002'.\nHINT: Do not include '.ini'", n);
+        return 0;
+    }
+
+    int linking_verb_flag = 0;
+    if (compare_token(inv[1], "to") == 0){
+        linking_verb_flag = 1;
+    }
+
+    if (linking_verb_flag == 1 && inc < 3){
+        // No file name given.
+        strncpy(response, "I need a file name to save under.\nExample: 'Save to INF1002'.\nHINT: Do not include '.ini'", n);
+        return 0;
+    }
+
+    // +5, space for file extension
+    char file_name[MAX_FILE_NAME + 5];
+    if (try_combine(inv, '_', 1 + linking_verb_flag, inc, MAX_FILE_NAME, file_name)){
+        // Append file extension
+        strncpy(file_name, concatenate(2, file_name, ".ini"), MAX_FILE_NAME + 5);
+
+        FILE *fp;
+        if((fp = fopen(file_name,"r"))!=NULL) {
+            // If file exists already, warn overwrite.
+            fclose(fp);
+            printf("WARN: the file '%s' exists before, it will be overwritten...\n", file_name);
+        }
+
+        // Open and write
+        fp = fopen(file_name, "w+");
+        knowledge_write(fp);
+        fclose(fp);
+
+        strncpy(response, concatenate(3, "Saved my current knowledge to '", file_name, "'."), n);
+    } else {
+        strncpy(response, "File name is too long!\nHINT: Do not include '.ini'", n);
+    }
 
 	return 0;
 

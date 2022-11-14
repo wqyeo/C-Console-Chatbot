@@ -193,9 +193,7 @@ int knowledge_read(FILE *f) {
  * Reset the knowledge base, removing all know entitities from all intents.
  */
 void knowledge_reset() {
-
-	/* to be implemented */
-
+    entity_cache[0].intent = EMPTY;
 }
 
 
@@ -206,11 +204,29 @@ void knowledge_reset() {
  *   f - the file
  */
 void knowledge_write(FILE *f) {
-    int i,h;
-    h = sizeof(entityValue);
-    for (i = 0; i < h; i++) {
-        fprintf(*f, concancate(entityValue[i].entity, "=", entityValue[i].description));
-    }
-	/* to be implemented */
+    int current_intent_no;
+    // Foreach intent
+    for (current_intent_no = 1; current_intent_no < NUM_INTENT_TYPE; ++current_intent_no) {
+        // Put down intent flag
+        if (current_intent_no == WHO){
+            fputs("[WHO]\n", f);
+        } else if (current_intent_no == WHERE){
+            fputs("[WHERE]\n", f);
+        } else if (current_intent_no == WHAT){
+            fputs("[WHAT]\n", f);
+        }
 
+        // Foreach item in cache, write if intent matches.
+        int i;
+        for (i = 0; i< MAX_ENTITY_CACHE; ++i){
+            if (entity_cache[i].intent == EMPTY || entity_cache[i].intent == NULL){
+                // End of cache.
+                break;
+            }
+
+            if (entity_cache[i].intent == current_intent_no){
+                fputs(concatenate(4, entity_cache[i].entity, "=", entity_cache[i].description, "\n"), f);
+            }
+        }
+    }
 }

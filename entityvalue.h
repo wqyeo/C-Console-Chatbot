@@ -7,7 +7,7 @@
 #define MAX_ENTITY_CACHE 512
 
 // U
-enum intentType { EMPTY = 0, WHO = 1, WHERE = 2, WHAT = 3 };
+enum intentType { EMPTY = 0, WHO = 1, WHERE = 2, WHAT = 3, NUM_INTENT_TYPE };
 
 struct entityValue {
     // Key
