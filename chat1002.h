@@ -26,6 +26,12 @@
 // Maximum number of characters allowed for a file name.
 #define MAX_FILE_NAME 32
 
+// Maximum number of characters allowed for a name
+#define MAX_NAME 32
+
+char chatbot_name[MAX_NAME];
+char user_name[MAX_NAME];
+
 /* return codes for knowledge_get() and knowledge_put() */
 enum KB_Code { KB_NOMEM = -3, KB_INVALID = -2, KB_NOTFOUND = -1, KB_OK = 0 };
 
@@ -49,6 +55,9 @@ bool chatbot_is_reset(const char *intent);
 int chatbot_do_reset(int inc, char *inv[], char *response, int n);
 bool chatbot_is_save(const char *intent);
 int chatbot_do_save(int inc, char *inv[], char *response, int n);
+// command for setting name
+bool chatbot_is_set_name(int inc, char* inv[]);
+int chatbot_set_name(int inc, char* inv[], char* response, int n);
 
 /* functions defined in knowledge.c */
 enum KB_Code knowledge_get(enum KB_Code intent, const char *entity, char *response, int n);

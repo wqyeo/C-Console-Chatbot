@@ -6,8 +6,8 @@
 // The maximum number of entity-value pairing we can store in cache.
 #define MAX_ENTITY_CACHE 512
 
-// U
-enum intentType { EMPTY = 0, WHO = 1, WHERE = 2, WHAT = 3, NUM_INTENT_TYPE };
+// NAME is just for name of bot/user.
+enum intentType { NAME = -1, EMPTY = 0, WHO = 1, WHERE = 2, WHAT = 3, NUM_INTENT_TYPE };
 
 struct entityValue {
     // Key

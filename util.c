@@ -5,12 +5,14 @@
 // Determine intent from string
 // EMPTY if invalid.
 int try_determine_intent(char* input){
-    if (strcmp(input, "[what]") == 0 || strcmp(input, "what") == 0){
+    if (compare_token(input, "[what]") == 0 || compare_token(input, "what") == 0){
         return WHAT;
-    } else if (strcmp(input, "[where]") == 0|| strcmp(input, "where") == 0) {
+    } else if (compare_token(input, "[where]") == 0|| compare_token(input, "where") == 0) {
         return WHERE;
-    } else if (strcmp(input, "[who]") == 0|| strcmp(input, "who") == 0){
+    } else if (compare_token(input, "[who]") == 0|| compare_token(input, "who") == 0){
         return WHO;
+    } else if (compare_token(input, "[name]") == 0) {
+        return NAME;
     }
 
     return EMPTY;

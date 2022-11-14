@@ -151,10 +151,25 @@ int knowledge_read(FILE *f) {
         }
 
         struct entityValue curr_entityValue;
-        if (!try_get_entityValue(current_line, MAX_INPUT, curr_intent_type, &curr_entityValue) || !try_insertReplace_cache(curr_entityValue)){
-            // Failed to get entityvalue, or failed to insert into cache.
+
+        if (!try_get_entityValue(current_line, MAX_INPUT, curr_intent_type, &curr_entityValue)){
+            // Failed to get entityvalue
             // TODO: error message or smth.
-            --readed_pairs;
+            continue;
+        }
+
+        if (curr_intent_type == NAME){
+            // Setting the name instead.
+            if (compare_token(curr_entityValue.entity, "chatbot_name") == 0){
+                strncpy(chatbot_name, curr_entityValue.description, MAX_NAME);
+            } else if (compare_token(curr_entityValue.entity, "user_name") == 0) {
+                strncpy(user_name, curr_entityValue.description, MAX_NAME);
+            }
+            continue;
+        } else if (!try_insertReplace_cache(curr_entityValue)){
+            // Failed to insert into cache.
+            // TODO: error message or smth.
+            continue;
         }
         ++readed_pairs;
 	}
@@ -194,6 +209,8 @@ int knowledge_read(FILE *f) {
  */
 void knowledge_reset() {
     entity_cache[0].intent = EMPTY;
+    strncpy(chatbot_name, "Chatbot", MAX_NAME);
+    strncpy(user_name, "User", MAX_NAME);
 }
 
 
@@ -204,6 +221,12 @@ void knowledge_reset() {
  *   f - the file
  */
 void knowledge_write(FILE *f) {
+
+    // Write name
+    fputs("[NAME]\n", f);
+    fputs(concatenate(4, "chatbot_name", "=", chatbot_name, "\n"), f);
+    fputs(concatenate(4, "user_name", "=", user_name, "\n"), f);
+
     int current_intent_no;
     // Foreach intent
     for (current_intent_no = 1; current_intent_no < NUM_INTENT_TYPE; ++current_intent_no) {
