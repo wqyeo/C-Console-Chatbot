@@ -31,7 +31,7 @@
  *   KB_NOTFOUND, if no response could be found
  *   KB_INVALID, if 'intent' is not a recognised question word
  */
-enum KB_Code knowledge_get(enum KB_Code intent, const char *entity, char *response, int n) {
+enum KB_Code knowledge_get(int intent, const char *entity, char *response, int n) {
 
     if (intent == EMPTY){
         // Unknown intent
@@ -85,7 +85,7 @@ enum KB_Code knowledge_get(enum KB_Code intent, const char *entity, char *respon
  *   KB_NOMEM, if there was a memory allocation failure
  *   KB_INVALID, if the intent is not a valid question word
  */
-enum KB_Code knowledge_put(enum KB_Code intent, const char *entity, const char *response) {
+enum KB_Code knowledge_put(int intent, const char *entity, const char *response) {
 
     if (is_whitespace_or_empty(response, strlen(response))){
         return KB_NOTFOUND;
