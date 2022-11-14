@@ -19,6 +19,9 @@ const char *delimiters = " ?\t\n";
 
 int main(int argc, char *argv[]) {
 
+    strncpy(chatbot_name, "Chatbot", MAX_NAME);
+    strncpy(user_name, "User", MAX_NAME);
+
 	char input[MAX_INPUT];      /* buffer for holding the user input */
 	int inc;                    /* the number of words in the user input */
 	char *inv[MAX_INPUT];       /* pointers to the beginning of each word of input */

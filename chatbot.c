@@ -54,9 +54,7 @@
  * Returns: the name of the chatbot as a null-terminated string
  */
 const char *chatbot_botname() {
-
-	return "Chatbot";
-
+	return &chatbot_name;
 }
 
 
@@ -66,7 +64,7 @@ const char *chatbot_botname() {
  * Returns: the name of the user as a null-terminated string
  */
 const char *chatbot_username() {
-	return "User";
+	return &user_name;
 }
 
 
@@ -99,10 +97,67 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 		return chatbot_do_reset(inc, inv, response, n);
 	else if (chatbot_is_save(inv[0]))
 		return chatbot_do_save(inc, inv, response, n);
+    else if (chatbot_is_set_name(inc, inv))
+        return chatbot_set_name(inc, inv, response, n);
 	else {
 		snprintf(response, n, "I don't understand \"%s\".", inv[0]);
 		return 0;
 	}
+}
+
+// True if the user wants to set name of someone.
+bool chatbot_is_set_name(int inc, char* inv[]){
+    if (inc < 1){
+        return false;
+    }
+
+    bool is_person = false;
+    if (compare_token(inv[0], "my") == 0 || compare_token(inv[0], "your") == 0 || compare_token(inv[0], "bot") == 0){
+        is_person = true;
+    }
+
+    // "my/your/bot name"
+    return is_person && compare_token(inv[1], "name") == 0;
+}
+
+// Set name of bot/user.
+int chatbot_set_name(int inc, char* inv[], char* response, int n){
+    // No additional args after command
+    if (inc < 2) {
+        strncpy(response, "Please give a name to set.", n);
+        return 0;
+    }
+
+    int linking_verb_flag = 0;
+    if (compare_token(inv[2], "is") == 0){
+        linking_verb_flag = 1;
+    }
+
+    // Not enough args after linking verb.
+    if (linking_verb_flag == 1 && inv < 3){
+        strncpy(response, "Please give a name to set.\nEx: 'My name is Geo'.", n);
+        return 0;
+    }
+
+    bool is_set_bot_name = compare_token(inv[0], "your") == 0 || compare_token(inv[0], "bot") == 0;
+
+    char input_name[MAX_NAME];
+    if (try_combine(inv, ' ', 2 + linking_verb_flag, inc, MAX_NAME, input_name)) {
+        if (is_set_bot_name){
+            // Set bot name
+            strncpy(chatbot_name, input_name, MAX_NAME);
+            strncpy(response, concatenate(3 ,"Got it, my name is now ", input_name, "."), n);
+        } else {
+            // Set user name
+            strncpy(user_name, input_name, MAX_NAME);
+            strncpy(response, concatenate(3 ,"Got it, your name is ", user_name, "."), n);
+        }
+    } else {
+        strncpy(response, "The name you have given is too long!\nHINT: Less than 32 characters.", n);
+    }
+
+
+    return 0;
 }
 
 
