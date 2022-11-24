@@ -8,11 +8,6 @@ bool try_get_entityValue(char* input, int input_size, enum intentType intent_typ
 bool is_linking_verb(const char *input);
 bool try_combine(char *str_arr[], char combine_with, int start_index, int end_index, int max_output_length, char* result);
 
-//[[deprecated]]
-char* try_get_entity(char* input, int size);
-//[[deprecated]]
-char* try_get_description(char* input, int size);
-
 // Utils with entity_cache.
 void print_cache();
 bool try_insertReplace_cache(struct entityValue element);
